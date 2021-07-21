@@ -1,0 +1,23 @@
+# Run this on first time setup (after the initial wizard and intro screen)
+docker exec --user www-data nextcloud-app php occ db:add-missing-indices
+
+# Run this on first time setup (after the initial wizard and intro screen)
+docker exec --user www-data nextcloud-app php occ config:app:set files max_chunk_size --value 0
+
+# Run this after the first time setup, after a migration, after updating and any time you make changes to data outside of the nextcloud web interface
+docker exec --user www-data nextcloud-app php occ maintenance:repair
+
+# Run this after the first time setup and after a migration
+docker exec --user www-data nextcloud-app php occ maintenance:update:htaccess
+
+# Run this after a migration
+docker exec --user www-data nextcloud-app php occ files:scan-app-data
+
+# Run this after a migration
+docker exec --user www-data nextcloud-app php occ files:scan --all
+
+# Run this after a migration or if you had to recover/restore any data outside the nextcloud web interface including restoring a database backup
+# This is required if you want syncronization clients to work properly
+docker exec --user www-data nextcloud-app php occ maintenance:data-fingerprint
+
+

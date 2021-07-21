@@ -1,0 +1,22 @@
+KEYMAPOPTS="us us"
+
+HOSTNAMEOPTS="-n testing"
+
+INTERFACESOPTS="
+auto eth0
+iface eth0 inet static
+	address 172.16.1.230
+	netmask 255.255.255.0
+	gateway 172.16.1.254
+"
+DNSOPTS="-n 8.8.8.8"
+
+TIMEZONEOPTS="-z Canada/Saskatchewan"
+
+PROXYOPTS="none"
+
+APKREPOSOPTS="-f"
+
+SSHDOPTS="-c openssh"
+
+NTPOPTS="-c chrony"

@@ -1,0 +1,108 @@
+version: '3'
+
+services:
+
+# Nextcloud app
+  app:
+    build: ./nextcloud
+    container_name: nextcloud-app
+    networks:
+      - proxy-tier
+      - default
+    depends_on:
+      - db
+      - redis
+    volumes:
+      # Main folder
+      - nextcloud:/var/www/html
+      # Synchronizes local time - Comment this out when testing with docker desktop
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - nc.env
+    restart: always
+
+# Nginx reverse-proxy
+  proxy:
+    build: ./proxy
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+    container_name: nextcloud-proxy
+    networks:
+      - proxy-tier
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      # SSL certificates and keys
+      - certs:/etc/nginx/certs:ro
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      # Synchronizes local time - Comment this out when testing with docker desktop
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+
+# Let's Encrypt auto-renewing SSL certificate
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: nextcloud-letsencrypt
+    depends_on:
+      - proxy
+    networks:
+      - proxy-tier
+    volumes:
+      # SSL certificates and keys
+      - certs:/etc/nginx/certs
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Synchronizes local time - Comment this out when testing with docker desktop
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+
+# MariaDB mysql database
+  db:
+    image: mariadb
+    container_name: nextcloud-mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    volumes:
+      # Database. This does not need to be bound to a directory on the host but it MUST exist as a volume.
+      - db:/var/lib/mysql
+      # Synchronizes local time - Comment this out when testing with docker desktop
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - db.env
+    restart: always
+
+# Crontab
+  cron:
+    image: nextcloud:stable-apache
+    container_name: nextcloud-cron
+    depends_on:
+      - db
+      - redis
+    volumes:
+      # Main folder
+      - nextcloud:/var/www/html
+      # Synchronizes local time - Comment this out when testing with docker desktop
+      - /etc/localtime:/etc/localtime:ro
+    entrypoint: /cron.sh
+    restart: always
+
+# Redis
+  redis:
+    container_name: nextcloud-redis
+    image: redis:alpine
+    restart: always
+
+# Volumes
+volumes:
+  certs:
+  db:
+  html:
+  nextcloud:
+  vhost.d:
+
+# Networks
+networks:
+  proxy-tier:
