@@ -6,6 +6,7 @@ docker exec --user www-data nextcloud-app php occ config:app:set files max_chunk
 
 # Run this after the first time setup, after a migration, after updating and any time you make changes to data outside of the nextcloud web interface
 docker exec --user www-data nextcloud-app php occ maintenance:repair
+# NOTE: the automatic repair option is not kind to low performance systems as it clears the image pre-generated previews. If you have a lot of images on your server try to avoid using it unless necessary.
 
 # Run this after the first time setup and after a migration
 docker exec --user www-data nextcloud-app php occ maintenance:update:htaccess
