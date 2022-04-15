@@ -5,6 +5,8 @@
  
  ## NOTE: the automatic repair option `docker exec --user www-data nextcloud-app php occ maintenance:repair` is not kind to low performance systems as it clears the image pre-generated previews. If you have a lot of images on your server try to avoid using it unless necessary.
  
+ [Preview generator optimizations for low performance systems](https://ownyourbits.com/2019/06/29/understanding-and-improving-nextcloud-previews/)
+ 
  ## TLDR
  
 Don't view this as a KISS approach newbie tutorial for getting Nextcloud to work on your Raspberry Pi.
